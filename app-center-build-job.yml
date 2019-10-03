@@ -1,0 +1,20 @@
+jobs:
+  - job: ${{ parameters.name }}
+    pool: server
+    steps:
+      - task: InvokeRESTAPI@1
+        inputs:
+          connectionType: 'connectedServiceName'
+          serviceConnection: 'App Center Connection'
+          method: 'GET'
+          headers: |
+            {
+            "X-API-Token": "$(APP_CENTER_API_KEY)"
+            }
+          urlSuffix: ${{ parameters.urlSuffix }}
+          waitForCompletion: 'false'
+          # Here we use the response from App Center and check an object exists where the JSON path (i.e. lastBuild.sourceVersion) matches either:
+          # - the latest commit in the PR (azure variable: System.PullRequest.SourceCommitId), or
+          # - the latest commit on the branch (azure variable: Build.SourceVersion)
+          # We then check in the object that the lastBuild.result === 'succeeded', to ensure the build has passed for this branch
+          successCriteria: "or(eq(jsonpath('$[?(@.lastBuild.sourceVersion==''$(System.PullRequest.SourceCommitId)'')].lastBuild.result')[0], 'succeeded'), eq(jsonpath('$[?(@.lastBuild.sourceVersion==''$(Build.SourceVersion)'')].lastBuild.result')[0], 'succeeded'))"

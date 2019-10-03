@@ -1,0 +1,12 @@
+trigger:
+- master
+
+jobs:
+  - template: app-center-build-job.yml
+    parameters:
+      name: AppCenterAndroidBuildStatus
+      urlSuffix: '/AndroidApp/branches'
+  - template: app-center-build-job.yml
+    parameters:
+      name: AppCenterIOSBuildStatus
+      urlSuffix: '/iOSApp/branches'
